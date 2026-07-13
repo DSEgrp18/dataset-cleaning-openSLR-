@@ -1,0 +1,21 @@
+# Raw and cleaned audio (download separately; do not commit)
+dataset/
+dataset_clean/
+*.wav
+*.tar.gz
+si_lk.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

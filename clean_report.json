@@ -1,0 +1,29 @@
+{
+  "total_input": 2064,
+  "kept": 2061,
+  "removed": 3,
+  "error": 0,
+  "removed_files": [
+    {
+      "file": "sin_6314_2322000532.wav",
+      "detail": "weak rms_i16=498.9 quiet=0.85"
+    },
+    {
+      "file": "sin_6314_3669372609.wav",
+      "detail": "weak rms_i16=684.2 quiet=0.86"
+    },
+    {
+      "file": "sin_6314_6152163786.wav",
+      "detail": "weak rms_i16=610.6 quiet=0.85"
+    }
+  ],
+  "error_files": [],
+  "settings": {
+    "trim_top_db": 25,
+    "peak_target": 0.95,
+    "min_rms_i16": 200.0,
+    "max_quiet_frac": 0.85,
+    "min_dur_sec": 0.5,
+    "target_sr": "original"
+  }
+}
