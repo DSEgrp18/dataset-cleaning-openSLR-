@@ -18,14 +18,63 @@ tar -xzf si_lk.tar.gz
 
 Place the extracted WAV files in a folder named `dataset/` next to `clean_dataset.py` (or adjust the paths in the script).
 
-## What the cleaner does
+## Cleaning pipeline
 
-1. **Drops weak clips** — removes mostly-quiet / low-energy recordings  
-2. **Trims silence** — cuts leading and trailing quiet (`top_db=25`)  
-3. **Peak-normalizes** — scales each clip to ~0.95 peak  
-4. **Writes copies only** — output goes to `dataset_clean/`; originals are never overwritten  
+`clean_dataset.py` processes every `*.wav` in `dataset/` in order. Originals are never modified; cleaned files are written to `dataset_clean/`.
 
-On a typical extract of this corpus (~2064 WAVs), the run kept **2061** clips and removed **3** weak files. See `clean_report.json`.
+```text
+dataset/*.wav
+      │
+      ▼
+┌─────────────────────┐
+│ 1. Load (mono)      │  librosa — keep original sample rate (48 kHz)
+└─────────┬───────────┘
+          ▼
+┌─────────────────────┐
+│ 2. Weak-clip filter │  drop if RMS (int16-scale) < 200
+│                     │  or quiet fraction ≥ 0.85
+└─────────┬───────────┘
+          ▼
+┌─────────────────────┐
+│ 3. Trim silence     │  librosa.effects.trim(top_db=25)
+│                     │  drop if empty or duration < 0.5 s
+└─────────┬───────────┘
+          ▼
+┌─────────────────────┐
+│ 4. Peak normalize   │  scale so peak ≈ 0.95
+└─────────┬───────────┘
+          ▼
+┌─────────────────────┐
+│ 5. Write + report   │  dataset_clean/<same name>.wav
+│                     │  dataset_clean/clean_report.json
+└─────────────────────┘
+```
+
+### Pipeline steps
+
+| Step | Action | Details |
+|------|--------|---------|
+| 1 | Load | Mono WAV; sample rate left at source (typically 48 kHz) |
+| 2 | Remove weak clips | Drop if energy is too low (`MIN_RMS = 200`) or most samples are near silence (`MAX_QUIET_FRAC = 0.85`) |
+| 3 | Trim silence | Cut leading/trailing quiet with `TRIM_TOP_DB = 25`; reject clips shorter than `MIN_DUR_SEC = 0.5` after trim |
+| 4 | Normalize loudness | Peak normalize to `PEAK_TARGET = 0.95` so levels are consistent |
+| 5 | Save copies | Write cleaned audio to `dataset_clean/`; write a JSON report of kept/removed files |
+
+### Tunable parameters
+
+Defined at the top of `clean_dataset.py`:
+
+| Parameter | Default | Meaning |
+|-----------|---------|---------|
+| `TRIM_TOP_DB` | `25` | Silence trim aggressiveness |
+| `PEAK_TARGET` | `0.95` | Target peak after normalization |
+| `MIN_RMS` | `200` | Minimum int16-scale RMS to keep |
+| `MAX_QUIET_FRAC` | `0.85` | Max fraction of near-silent samples |
+| `MIN_DUR_SEC` | `0.5` | Minimum duration after trim |
+
+### Example result
+
+On a typical extract of this corpus (~2064 WAVs), the pipeline kept **2061** clips and removed **3** weak files. See `clean_report.json`.
 
 ## Setup
 
